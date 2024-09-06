@@ -31,6 +31,13 @@ func (a *App) Greet(name string) string {
 
 // 执行cmd方法，并返回结果
 func (a *App) GetProcessInfoByPort(port string) ([]ProcessInfo, error) {
+	// 使用defer recover
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("GetProcessInfoByPort recovered from panic:", r)
+		}
+	}()
+
 	cmd := exec.Command("cmd", "/c", "netstat -ano | findstr "+port)
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	out, err := cmd.Output()
@@ -48,6 +55,7 @@ func (a *App) GetProcessInfoByPort(port string) ([]ProcessInfo, error) {
 		if line == "" {
 			continue
 		}
+		fmt.Printf("line: %s \n", line)
 
 		fields := strings.Fields(line)
 		// fields[0] 协议
@@ -56,6 +64,17 @@ func (a *App) GetProcessInfoByPort(port string) ([]ProcessInfo, error) {
 		// fields[3] 状态
 		// fields[4] 进程号
 		//
+		if len(fields) < 5 {
+			continue
+		}
+		ipPortArray := strings.Split(fields[1], ":")
+		if len(ipPortArray) < 2 {
+			continue
+		}
+		if ipPortArray[1] != port {
+			continue
+		}
+
 		fmt.Println(fields[0], fields[1], fields[2], fields[3], fields[4])
 		processInfo = append(processInfo,
 			ProcessInfo{Protocol: fields[0],
@@ -68,6 +87,12 @@ func (a *App) GetProcessInfoByPort(port string) ([]ProcessInfo, error) {
 }
 
 func (a *App) Kill(ports string) error {
+	// 使用defer recover
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Kill recovered from panic:", r)
+		}
+	}()
 	portArray := strings.Split(ports, ",")
 	for _, port := range portArray {
 		err := kill(port)

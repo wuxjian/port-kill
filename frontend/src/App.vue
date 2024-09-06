@@ -1,6 +1,8 @@
 <script setup>
 import { onMounted, ref, reactive } from 'vue'
 import { GetProcessInfoByPort, Kill } from '../wailsjs/go/main/App'
+import { Message } from '@arco-design/web-vue';
+
 
 
 onMounted(() => {
@@ -12,12 +14,18 @@ async function handleQuery() {
     return
   }
   try {
+    loading.value = true
     const result = await GetProcessInfoByPort(port.value + '')
     result.forEach(item => item.key = item.local_address)
     data.value = result
   } catch (e) {
     data.value = []
-    console.log('查询端口信息失败', e)
+    Message.info({
+      content: '没有进程数据',
+      duration: 500
+    })
+  } finally {
+    loading.value = false
   }
 }
 
@@ -59,6 +67,8 @@ const selectedKeys = ref([]);
 const data = ref([]);
 
 const visible = ref(false);
+
+const loading = ref(false);
 const handleOk = async () => {
   // 循环selectedKeys
   if (!selectedKeys.value.length) {
@@ -86,7 +96,7 @@ const handleCancel = () => {
       <div>
         <a-space direction="horizontal" fill>
           <a-input-number v-model="port" :style="{ width: '320px' }" placeholder="端口号" :min="10" :max="65535" />
-          <a-button type="primary" status="success" @click="handleQuery">查询</a-button>
+          <a-button type="primary" status="success" @click="handleQuery" :loading="loading">查询</a-button>
           <a-button type="primary" status="warning" @click="handleKill">Kill</a-button>
         </a-space>
       </div>
