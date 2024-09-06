@@ -44,8 +44,12 @@ const columns = [
     dataIndex: 'protocol',
   },
   {
-    title: 'IP地址及端口',
+    title: '本地地址',
     dataIndex: 'local_address',
+  },
+  {
+    title: '外部地址',
+    dataIndex: 'remote_address',
   },
   {
     title: '状态',
