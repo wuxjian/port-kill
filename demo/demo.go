@@ -1,39 +1,25 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"os/exec"
 	"strings"
 )
 
-// App struct
-type App struct {
-	ctx context.Context
+func main() {
+	process_infos, err := getProcessInfoByPort("8085")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(process_infos)
 }
 
-// NewApp creates a new App application struct
-func NewApp() *App {
-	return &App{}
-}
-
-// startup is called when the app starts. The context is saved
-// so we can call the runtime methods
-func (a *App) startup(ctx context.Context) {
-	a.ctx = ctx
-}
-
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
-}
-
-// 执行cmd方法，并返回结果
-func (a *App) GetProcessInfoByPort(port string) ([]ProcessInfo, error) {
+func getProcessInfoByPort(port string) ([]ProcessInfo, error) {
 	cmd := exec.Command("cmd", "/c", "netstat -ano | findstr "+port)
 	out, err := cmd.Output()
 	if err != nil {
-		fmt.Printf("get port %s failed %v", port, err)
+		fmt.Println(err)
 		return nil, err
 	}
 	result := string(out)
@@ -63,24 +49,6 @@ func (a *App) GetProcessInfoByPort(port string) ([]ProcessInfo, error) {
 				Pid:           fields[4]})
 	}
 	return processInfo, nil
-}
-
-func (a *App) Kill(ports string) error {
-	portArray := strings.Split(ports, ",")
-	for _, port := range portArray {
-		err := kill(port)
-		if err != nil {
-			fmt.Printf("kill port %s failed %v", port, err)
-			return err
-		}
-	}
-	return nil
-}
-
-func kill(port string) error {
-	cmd := exec.Command("cmd", "/c", fmt.Sprintf("taskkill /PID %s /F", port))
-	_, err := cmd.Output()
-	return err
 }
 
 type ProcessInfo struct {
