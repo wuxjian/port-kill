@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+	"syscall"
 )
 
 // App struct
@@ -31,6 +32,7 @@ func (a *App) Greet(name string) string {
 // 执行cmd方法，并返回结果
 func (a *App) GetProcessInfoByPort(port string) ([]ProcessInfo, error) {
 	cmd := exec.Command("cmd", "/c", "netstat -ano | findstr "+port)
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	out, err := cmd.Output()
 	if err != nil {
 		fmt.Printf("get port %s failed %v", port, err)
@@ -79,6 +81,7 @@ func (a *App) Kill(ports string) error {
 
 func kill(port string) error {
 	cmd := exec.Command("cmd", "/c", fmt.Sprintf("taskkill /PID %s /F", port))
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	_, err := cmd.Output()
 	return err
 }
