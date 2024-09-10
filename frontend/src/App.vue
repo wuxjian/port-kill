@@ -9,6 +9,9 @@ onMounted(() => {
   handleQuery()
 })
 
+const port = ref(null)
+const loading = ref(false);
+const data = ref([]);
 async function handleQuery() {
   if (!port.value) {
     return
@@ -29,6 +32,7 @@ async function handleQuery() {
   }
 }
 
+const visible = ref(false);
 async function handleKill() {
   if (!selectedKeys.value.length) {
     return
@@ -36,7 +40,7 @@ async function handleKill() {
   visible.value = true
 }
 
-const port = ref(null)
+
 
 const columns = [
   {
@@ -68,11 +72,8 @@ const rowSelection = reactive({
 });
 const selectedKeys = ref([]);
 
-const data = ref([]);
 
-const visible = ref(false);
 
-const loading = ref(false);
 const handleOk = async () => {
   // 循环selectedKeys
   if (!selectedKeys.value.length) {
